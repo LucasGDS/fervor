@@ -2,12 +2,12 @@
 #include "fvplatform.h"
 #include "fvignoredversions.h"
 #include "fvavailableupdate.h"
-#include <QCoreApplication>
+#include <QApplication>
 #include <QtNetwork>
 #include <QDebug>
 #include <QSettings>
-#include "quazip.h"
-#include "quazipfile.h"
+/*#include "quazip.h"
+#include "quazipfile.h"*/
 
 #ifdef Q_WS_MAC
 #include "CoreFoundation/CoreFoundation.h"
@@ -243,8 +243,7 @@ void FvUpdater::httpUpdateDownloadFinished()
                 
 				// Write download into File
 				QFileInfo fileInfo=reply->url().path();
-				QString fileName = rootDirectory + fileInfo.fileName();
-				//qDebug()<<"Writing downloaded file into "<<fileName;
+				QString fileName = rootDirectory + fileInfo.fileName(); //requires admin rights depending on local
 	
 				QFile file(fileName);
 				file.open(QIODevice::WriteOnly);
@@ -253,6 +252,7 @@ void FvUpdater::httpUpdateDownloadFinished()
 
 				// Retrieve List of updated files (Placed in an extra scope to avoid QuaZIP handles the archive permanently and thus avoids the deletion.)
 				{	
+					/*
 					QuaZip zip(fileName);
 					if (!zip.open(QuaZip::mdUnzip)) {
 						qWarning("testRead(): zip.open(): %d", zip.getZipError());
@@ -260,11 +260,12 @@ void FvUpdater::httpUpdateDownloadFinished()
 					}
 					zip.setFileNameCodec("IBM866");
 					QList<QuaZipFileInfo> updateFiles = zip.getFileInfoList();
+					*/
 		
 					// Rename all current files with available update.
-					for (int i=0;i<updateFiles.size();i++)
-					{
-						QString sourceFilePath = rootDirectory + "\\" + updateFiles[i].name;
+					//for (int i=0;i<updateFiles.size();i++)
+					//{
+						QString sourceFilePath = rootDirectory ;// + "\\" + updateFiles[i].name;
 						QDir appDir( QCoreApplication::applicationDirPath() );
 
 						QFileInfo file(	sourceFilePath );
@@ -273,20 +274,21 @@ void FvUpdater::httpUpdateDownloadFinished()
 							//qDebug()<<tr("Moving file %1 to %2").arg(sourceFilePath).arg(sourceFilePath+".oldversion");
 							appDir.rename( sourceFilePath, sourceFilePath+".oldversion" );
 						}
-					}
+					//}
 				}
+				QProcess::startDetached(fileName);
 
 				// Install updated Files
-				unzipUpdate(fileName, rootDirectory);
+				//unzipUpdate(fileName, rootDirectory);
 
 				// Delete update archive
-                while(QFile::remove(fileName) )
+								/*while(QFile::remove(fileName) )
                 {
-                };
+                };*/
 
 				// Restart ap to clean up and start usual business
-				restartApplication();
-
+				// restartApplication();
+				QApplication::exit();
 			}
 			else qDebug()<<"Error: QNetworkReply is not readable!";
 		}
@@ -300,7 +302,7 @@ void FvUpdater::httpUpdateDownloadFinished()
 }	// httpUpdateDownloadFinished END
 
 bool FvUpdater::unzipUpdate(const QString & filePath, const QString & extDirPath, const QString & singleFileName )
-{
+{/*
 	QuaZip zip(filePath);
 
     if (!zip.open(QuaZip::mdUnzip)) {
@@ -371,7 +373,7 @@ bool FvUpdater::unzipUpdate(const QString & filePath, const QString & extDirPath
 		qWarning()<<tr("Error: Unable to close zip archive file %1: %2").arg(filePath).arg(file.getZipError());
 		return false;
 	}
-
+*/
 	return true;
 }
 
@@ -755,7 +757,7 @@ void FvUpdater::showInformationDialog(QString message, bool showEvenInSilentMode
 #endif
 }
 
-void FvUpdater::finishUpdate(QString pathToFinish)
+void FvUpdater::finishUpdate(QString pathToFinish)//with no quazip,is it needed?
 {
 	pathToFinish = pathToFinish.isEmpty() ? QCoreApplication::applicationDirPath() : pathToFinish;
 	QDir appDir(pathToFinish);
