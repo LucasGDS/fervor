@@ -252,7 +252,7 @@ void FvUpdater::httpUpdateDownloadFinished()
 
 				// Retrieve List of updated files (Placed in an extra scope to avoid QuaZIP handles the archive permanently and thus avoids the deletion.)
 				{	
-					/*
+#ifdef QUAZIP_BUILD
 					QuaZip zip(fileName);
 					if (!zip.open(QuaZip::mdUnzip)) {
 						qWarning("testRead(): zip.open(): %d", zip.getZipError());
@@ -261,11 +261,18 @@ void FvUpdater::httpUpdateDownloadFinished()
 					zip.setFileNameCodec("IBM866");
 					QList<QuaZipFileInfo> updateFiles = zip.getFileInfoList();
 					*/
+
 		
-					// Rename all current files with available update.
-					//for (int i=0;i<updateFiles.size();i++)
-					//{
-						QString sourceFilePath = rootDirectory ;// + "\\" + updateFiles[i].name;
+					 Rename all current files with available update.
+					for (int i=0;i<updateFiles.size();i++)
+					{
+
+						QString sourceFilePath = rootDirectory ; + "\\" + updateFiles[i].name;
+
+#else
+					{
+						QString sourceFilePath = rootDirectory ;// change if should be downloaded somewhere else
+#endif
 						QDir appDir( QCoreApplication::applicationDirPath() );
 
 						QFileInfo file(	sourceFilePath );
@@ -274,21 +281,24 @@ void FvUpdater::httpUpdateDownloadFinished()
 							//qDebug()<<tr("Moving file %1 to %2").arg(sourceFilePath).arg(sourceFilePath+".oldversion");
 							appDir.rename( sourceFilePath, sourceFilePath+".oldversion" );
 						}
-					//}
+					}
 				}
-				QProcess::startDetached(fileName);
 
-				// Install updated Files
-				//unzipUpdate(fileName, rootDirectory);
+#ifdef QUAZIP_BUILD
+				 Install updated Files
+				unzipUpdate(fileName, rootDirectory);
 
-				// Delete update archive
-								/*while(QFile::remove(fileName) )
+				 Delete update archive
+								while(QFile::remove(fileName) )
                 {
-                };*/
+                };
 
-				// Restart ap to clean up and start usual business
-				// restartApplication();
+				 Restart ap to clean up and start usual business
+				 FvUpdater::restartApplication();
+#else
+				QProcess::startDetached(fileName);
 				QApplication::exit();
+#endif
 			}
 			else qDebug()<<"Error: QNetworkReply is not readable!";
 		}
@@ -302,7 +312,8 @@ void FvUpdater::httpUpdateDownloadFinished()
 }	// httpUpdateDownloadFinished END
 
 bool FvUpdater::unzipUpdate(const QString & filePath, const QString & extDirPath, const QString & singleFileName )
-{/*
+{
+#ifdef QUAZIP_BUILD
 	QuaZip zip(filePath);
 
     if (!zip.open(QuaZip::mdUnzip)) {
@@ -373,8 +384,9 @@ bool FvUpdater::unzipUpdate(const QString & filePath, const QString & extDirPath
 		qWarning()<<tr("Error: Unable to close zip archive file %1: %2").arg(filePath).arg(file.getZipError());
 		return false;
 	}
-*/
+#endif
 	return true;
+
 }
 
 

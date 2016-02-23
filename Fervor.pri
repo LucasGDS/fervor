@@ -1,4 +1,4 @@
-#CONFIG += fervor_gui
+CONFIG += fervor_gui
 
 contains(QT_VERSION, ^5\\.[0-9]\\..*){
     QT += core widgets webkitwidgets network
