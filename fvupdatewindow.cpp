@@ -8,7 +8,7 @@
 
 
 FvUpdateWindow::FvUpdateWindow(QWidget *parent, bool skipVersionAllowed, bool remindLaterAllowed) :
-	QWidget(parent, Qt::CustomizeWindowHint),
+    QWidget(parent),
 	m_ui(new Ui::FvUpdateWindow)
 {
 	m_ui->setupUi(this);
@@ -54,6 +54,7 @@ bool FvUpdateWindow::UpdateWindowWithCurrentProposedUpdate()
 	m_ui->wouldYouLikeToDownloadLabel->setText(downloadString);
 
 	m_ui->releaseNotesWebView->stop();
+    m_ui->releaseNotesWebView->settings()->setFontSize(QWebSettings::DefaultFontSize, 12);
 	m_ui->releaseNotesWebView->load(proposedUpdate->GetReleaseNotesLink());
 
 	return true;
