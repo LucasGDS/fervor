@@ -6,8 +6,12 @@
 #include <QtNetwork>
 #include <QDebug>
 #include <QSettings>
-/*#include "quazip.h"
-#include "quazipfile.h"*/
+#include <QDir>
+
+#ifdef QUAZIP_BUILD
+#include "quazip.h"
+#include "quazipfile.h"
+#endif
 
 #ifdef Q_WS_MAC
 #include "CoreFoundation/CoreFoundation.h"
@@ -227,6 +231,7 @@ void FvUpdater::httpUpdateDownloadFinished()
 		{
 			if (reply->isReadable())
 			{
+				/*
 #ifdef Q_WS_MAC
                 CFURLRef appURLRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
                 char path[PATH_MAX];
@@ -239,12 +244,18 @@ void FvUpdater::httpUpdateDownloadFinished()
                 QString rootDirectory = filePath.left(filePath.lastIndexOf("/"));
 #else
                 QString rootDirectory = QCoreApplication::applicationDirPath() + "/";
-#endif
-                
+#endif  */
+        QString tempDir = QDir::tempPath();
+        if (tempDir.endsWith("/")==false)
+        {
+          tempDir = tempDir + "/";
+        }
+
 				// Write download into File
 				QFileInfo fileInfo=reply->url().path();
-				QString fileName = rootDirectory + fileInfo.fileName(); //requires admin rights depending on local
-	
+				//QString fileName = rootDirectory + fileInfo.fileName(); //requires admin rights depending on local
+				QString fileName = tempDir + fileInfo.fileName();
+
 				QFile file(fileName);
 				file.open(QIODevice::WriteOnly);
 				file.write(reply->readAll());
@@ -271,7 +282,7 @@ void FvUpdater::httpUpdateDownloadFinished()
 
 #else
 					{
-						QString sourceFilePath = rootDirectory ;// change if should be downloaded somewhere else
+						QString sourceFilePath = tempDir ;//rootDirectory ;// change if should be downloaded somewhere else
 #endif
 						QDir appDir( QCoreApplication::applicationDirPath() );
 
